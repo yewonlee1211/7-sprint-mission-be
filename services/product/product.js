@@ -10,8 +10,8 @@ export const fetchAllProducts = async (query) => {
   return await getAllProducts(query);
 };
 
-export const fetchProductById = async (id) => {
-  return await getProductById(id);
+export const fetchProductById = async (id, userId) => {
+  return await getProductById(id, userId);
 };
 
 export const createProduct = async (data) => {

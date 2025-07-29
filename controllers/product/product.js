@@ -22,8 +22,9 @@ export const getAllProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   const id = req.params.id;
+  const userId = req.query.userId;
   try {
-    const products = await fetchProductById(id);
+    const products = await fetchProductById(id, userId);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
