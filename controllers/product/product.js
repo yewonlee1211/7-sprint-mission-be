@@ -36,7 +36,7 @@ export const getProductById = async (req, res) => {
 };
 
 export const postProduct = async (req, res) => {
-  const data = req.body;
+  const { data } = req.body;
   try {
     const products = await createProduct(data);
     if (!products) {
@@ -50,7 +50,8 @@ export const postProduct = async (req, res) => {
 };
 
 export const patchProduct = async (req, res) => {
-  const { id, data } = req.body;
+  const { data } = req.body;
+  const id = req.params.id;
   try {
     const products = await updateProduct(id, data);
     if (!products) {
