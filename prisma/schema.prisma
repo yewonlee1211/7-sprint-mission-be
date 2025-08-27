@@ -14,17 +14,18 @@ datasource db {
 }
 
 model User {
-  id       String     @id @default(uuid())
-  email    String
-  password String
-  nickname String
-  img      String     @default("")
-  Product  Product[]
-  article  Article[]
-  pComment PComment[]
-  AComment AComment[]
-  PHeart   PHeart[]
-  AHeart   AHeart[]
+  id           String     @id @default(uuid())
+  email        String     @unique
+  password     String
+  nickname     String
+  refreshToken String?
+  img          String     @default("")
+  Product      Product[]
+  article      Article[]
+  pComment     PComment[]
+  AComment     AComment[]
+  PHeart       PHeart[]
+  AHeart       AHeart[]
 }
 
 model Product {

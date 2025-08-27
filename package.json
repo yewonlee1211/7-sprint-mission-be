@@ -2,11 +2,14 @@
   "dependencies": {
     "@prisma/client": "^5.4.2",
     "axios": "^1.10.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "is-email": "^1.0.2",
     "is-uuid": "^1.0.2",
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^5.4.2",
     "superstruct": "^1.0.3"
   },

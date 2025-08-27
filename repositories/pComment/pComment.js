@@ -7,7 +7,12 @@ const prisma = new PrismaClient();
 export const getAllPComments = async (productId, cursor, limit = 10) => {
   return await prisma.pComment.findMany({
     where: { productId },
-    select: { id: true, content: true, createdAt: true },
+    select: {
+      id: true,
+      content: true,
+      user: { select: { nickname: true, id: true, img: true } },
+      updatedAt: true,
+    },
     cursor,
     take: parseInt(limit),
   });
