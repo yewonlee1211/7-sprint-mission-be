@@ -9,7 +9,6 @@ import {
 // 회원가입
 export const signupUser = async (req, res) => {
   const data = req.body;
-  console.log(req.body);
   try {
     const user = await createUser(data);
     if (!user) {
