@@ -6,13 +6,7 @@ const prisma = new PrismaClient();
 // 자유게시글 목록 조회 get
 // offset 페이지네이션, 최신순 정렬
 // title, content에 포함된 단어로 검색
-export const getAllArticles = async ({
-  userId,
-  keyword,
-  offset = 0,
-  limit = 10,
-  orderBy,
-}) => {
+const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
   const search = keyword ? `%${keyword}%` : null;
 
   const whereClause = search
@@ -34,20 +28,19 @@ export const getAllArticles = async ({
       u.img,
       COUNT(DISTINCT CASE WHEN h.canceled = false THEN h.id END) AS heart_count,
       EXISTS (
-        SELECT 1 FROM "AHeart" h2 
-        WHERE h2."articleId" = a.id AND h2."userId" = ${userId} AND h2.canceled = false
+        SELECT 1 FROM "ArticleHeart" h2 
+        WHERE h2."articleId" = a.id AND h2."userId" = ${userId}
       ) AS "isHearted",
       (
         SELECT h3.id
-        FROM "AHeart" h3
+        FROM "ArticleHeart" h3
         WHERE h3."articleId" = a.id
           AND h3."userId" = ${userId}
-          AND h3.canceled = false
         LIMIT 1
       ) AS "heartId"
     FROM "Article" a
     JOIN "User" u ON a."userId" = u.id
-    LEFT JOIN "AHeart" h ON h."articleId" = a.id
+    LEFT JOIN "ArticleHeart" h ON h."articleId" = a.id
     WHERE a.deleted = false
       ${whereClause}
     GROUP BY a.id, u.id
@@ -65,7 +58,7 @@ export const getAllArticles = async ({
 };
 
 // 자유게시글 단일 조회 get
-export const getArticleById = async (id, userId) => {
+const getById = async (id, userId) => {
   return await prisma.article.findUnique({
     where: { id, deleted: false },
     select: {
@@ -76,12 +69,12 @@ export const getArticleById = async (id, userId) => {
       user: { select: { id: true, nickname: true, img: true } },
       _count: {
         select: {
-          AHeart: { where: { canceled: false } },
-          AComment: { where: { deleted: false } },
+          articleHeart,
+          articleComment: { where: { deleted: false } },
         },
       },
-      AHeart: {
-        where: { userId: userId || "noUser", canceled: false },
+      articleHeart: {
+        where: { userId: userId || "noUser" },
         select: { id: true },
       },
     },
@@ -89,21 +82,23 @@ export const getArticleById = async (id, userId) => {
 };
 
 // 자유게시글 등록 post (입력값 data는 객체)
-export const postArticle = async (data) => {
+const post = async (data) => {
   return await prisma.article.create({
     data: data,
   });
 };
 
 // 자유게시글 수정 patch (입력값 data는 객체, id는 문자열)
-export const patchArticle = async (id, data) => {
+const patch = async (id, data) => {
   return await prisma.article.update({
     where: { id: id },
     data: data,
   });
 };
 
-// 자유게시글 삭제 delete (입력값 id)
-export const deleteArticle = async (id) => {
-  return await prisma.article.delete({ where: { id: id } });
+export default {
+  getAll,
+  getById,
+  post,
+  patch,
 };

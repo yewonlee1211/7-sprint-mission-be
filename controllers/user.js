@@ -1,3 +1,4 @@
+import express from "express";
 import {
   createToken,
   refreshToken,
@@ -6,8 +7,10 @@ import {
   patchUser,
 } from "../services/user.js";
 
-// 회원가입
-export const signupUser = async (req, res) => {
+const userController = express.Router();
+
+// userController.post("/token/refresh", authRefreshMiddleware, refreshAccessToken);
+userController.post("/signup", async (req, res) => {
   const data = req.body;
   try {
     const user = await createUser(data);
@@ -29,10 +32,9 @@ export const signupUser = async (req, res) => {
     console.error("❌ [signupUser] error:", e);
     res.status(500).json({ error: `${e}` });
   }
-};
+});
 
-// 로그인
-export const loginUser = async (req, res) => {
+userController.post("/", async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
   try {
@@ -53,7 +55,9 @@ export const loginUser = async (req, res) => {
     console.error("❌ [loginUser] error:", e);
     res.status(500).json({ error: `${e}` });
   }
-};
+});
+
+export default userController;
 
 // 액세스 토큰 재발급
 export const refreshAccessToken = async (req, res) => {

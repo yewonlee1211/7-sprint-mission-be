@@ -1,9 +1,13 @@
-import { createAHeart, updateAHeart } from "../../services/aHeart/aHeart.js";
+import express from "express";
+import articleHeartService from "../services/articleHeart.js";
+import { authLoginMiddleware } from "../config/passport.js";
 
-export const postAHeart = async (req, res) => {
+const articleHeartController = express.Router();
+
+articleHeartController.post("/", authLoginMiddleware, async (req, res) => {
   const data = req.body;
   try {
-    const hearts = await createAHeart(data);
+    const hearts = await articleHeartService.post(data);
     if (!hearts) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -12,13 +16,13 @@ export const postAHeart = async (req, res) => {
     console.error("❌ [postAHeart] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const patchAHeart = async (req, res) => {
+articleHeartController.delete("/:id", authLoginMiddleware, async (req, res) => {
   const { id } = req.params;
   const { data } = req.body;
   try {
-    const hearts = await updateAHeart(id, data);
+    const hearts = await articleHeartService.deleteById(id, data);
     if (!hearts) {
       return res.status(404).json({ error: "Hearts not found" });
     }
@@ -27,4 +31,6 @@ export const patchAHeart = async (req, res) => {
     console.error("❌ [patchAHeart] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
+
+export default articleHeartController;

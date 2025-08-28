@@ -1,15 +1,13 @@
-import {
-  fetchAllProducts,
-  fetchProductById,
-  createProduct,
-  updateProduct,
-  deleteProductService,
-} from "../../services/product/product.js";
+import express from "express";
+import productService from "../services/product.js";
+import { authLoginMiddleware } from "../config/passport.js";
 
-export const getAllProducts = async (req, res) => {
+const productController = express.Router();
+
+productController.get("/", authLoginMiddleware, async (req, res) => {
   const { query } = req;
   try {
-    const products = await fetchAllProducts(query);
+    const products = await productService.getAll(query);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
@@ -18,13 +16,13 @@ export const getAllProducts = async (req, res) => {
     console.error("❌ [getAllProducts] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const getProductById = async (req, res) => {
+productController.get("/:id", authLoginMiddleware, async (req, res) => {
   const id = req.params.id;
   const userId = req.query.userId;
   try {
-    const products = await fetchProductById(id, userId);
+    const products = await productService.getById(id, userId);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
@@ -33,12 +31,12 @@ export const getProductById = async (req, res) => {
     console.error("❌ [getProductById] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const postProduct = async (req, res) => {
+productController.post("/", authLoginMiddleware, async (req, res) => {
   const { data } = req.body;
   try {
-    const products = await createProduct(data);
+    const products = await productService.post(data);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
@@ -47,13 +45,13 @@ export const postProduct = async (req, res) => {
     console.error("❌ [postProduct] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const patchProduct = async (req, res) => {
+productController.patch("/:id", authLoginMiddleware, async (req, res) => {
   const { data } = req.body;
   const id = req.params.id;
   try {
-    const products = await updateProduct(id, data);
+    const products = await productService.patch(id, data);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
@@ -62,12 +60,12 @@ export const patchProduct = async (req, res) => {
     console.error("❌ [patchProduct] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const deleteProduct = async (req, res) => {
+productController.delete("/:id", authLoginMiddleware, async (req, res) => {
   const id = req.params.id;
   try {
-    const products = await deleteProductService(id);
+    const products = await productService.deleteById(id);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
@@ -76,4 +74,6 @@ export const deleteProduct = async (req, res) => {
     console.error("❌ [deleteProduct] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
+
+export default productController;

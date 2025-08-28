@@ -3,13 +3,7 @@ import { Prisma } from "@prisma/client";
 import { skip } from "@prisma/client/runtime/library";
 const prisma = new PrismaClient();
 
-export const getAllProducts = async ({
-  userId,
-  keyword,
-  offset = 0,
-  limit = 10,
-  orderBy,
-}) => {
+const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
   const search = keyword ? `%${keyword}%` : null;
 
   const whereClause = search
@@ -31,20 +25,19 @@ export const getAllProducts = async ({
       u.img,
       COUNT(DISTINCT CASE WHEN h.canceled = false THEN h.id END) AS heart_count,
       EXISTS (
-        SELECT 1 FROM "PHeart" h2 
-        WHERE h2."productId" = p.id AND h2."userId" = ${userId} AND h2.canceled = false
+        SELECT 1 FROM "ProductHeart" h2 
+        WHERE h2."productId" = p.id AND h2."userId" = ${userId}
       ) AS "isHearted",
       (
         SELECT h3.id
-        FROM "PHeart" h3
+        FROM "ProductHeart" h3
         WHERE h3."productId" = p.id
           AND h3."userId" = ${userId}
-          AND h3.canceled = false
         LIMIT 1
       ) AS "heartId"
     FROM "Product" p
     JOIN "User" u ON p."userId" = u.id
-    LEFT JOIN "PHeart" h ON h."productId" = p.id
+    LEFT JOIN "ProductHeart" h ON h."productId" = p.id
     WHERE p.deleted = false
       ${whereClause}
     GROUP BY p.id, u.id
@@ -62,7 +55,7 @@ export const getAllProducts = async ({
 };
 
 // 상품게시글 단일 조회 get
-export const getProductById = async (id, userId) => {
+const getById = async (id, userId) => {
   return await prisma.product.findUnique({
     where: { id, deleted: false },
     select: {
@@ -74,12 +67,12 @@ export const getProductById = async (id, userId) => {
       user: { select: { id: true, nickname: true, img: true } },
       _count: {
         select: {
-          PHeart: { where: { canceled: false } },
-          pComment: { where: { deleted: false } },
+          productHeart,
+          productComment: { where: { deleted: false } },
         },
       },
-      PHeart: {
-        where: { userId: userId || "noUser", canceled: false },
+      productHeart: {
+        where: { userId: userId || "noUser" },
         select: { id: true },
       },
     },
@@ -87,14 +80,14 @@ export const getProductById = async (id, userId) => {
 };
 
 // 상품게시글 등록 post (입력값 data는 객체)
-export const postProduct = async (data) => {
+const post = async (data) => {
   return await prisma.product.create({
     data: data,
   });
 };
 
 // 상품게시글 수정 patch (입력값 data는 객체, id는 문자열)
-export const patchProduct = async (id, data) => {
+const patch = async (id, data) => {
   return await prisma.product.update({
     where: { id: id },
     data: data,
@@ -102,6 +95,14 @@ export const patchProduct = async (id, data) => {
 };
 
 // 상품게시글 삭제 delete (입력값 id)
-export const deleteProduct = async (id) => {
+const deleteById = async (id) => {
   return await prisma.product.delete({ where: { id: id } });
+};
+
+export default {
+  getAll,
+  getById,
+  post,
+  patch,
+  deleteById,
 };

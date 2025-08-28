@@ -14,49 +14,49 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  password     String
-  nickname     String
-  refreshToken String?
-  img          String     @default("")
-  Product      Product[]
-  article      Article[]
-  pComment     PComment[]
-  AComment     AComment[]
-  PHeart       PHeart[]
-  AHeart       AHeart[]
+  id             String           @id @default(uuid())
+  email          String           @unique
+  password       String
+  nickname       String
+  refreshToken   String?
+  img            String           @default("")
+  Product        Product[]
+  article        Article[]
+  productComment ProductComment[]
+  articleComment ArticleComment[]
+  productHeart   ProductHeart[]
+  articleHeart   ArticleHeart[]
 }
 
 model Product {
-  id          String     @id @default(uuid())
-  name        String
-  description String
-  price       Int
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String
-  deleted     Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  pComment    PComment[]
-  tag         tag[]
-  PHeart      PHeart[]
+  id             String           @id @default(uuid())
+  name           String
+  description    String
+  price          Int
+  user           User             @relation(fields: [userId], references: [id])
+  userId         String
+  deleted        Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  tag            tag[]
+  productComment ProductComment[]
+  productHeart   ProductHeart[]
 }
 
 model Article {
-  id        String     @id @default(uuid())
-  title     String
-  content   String?
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  deleted   Boolean    @default(false)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  AComment  AComment[]
-  AHeart    AHeart[]
+  id             String           @id @default(uuid())
+  title          String
+  content        String?
+  user           User             @relation(fields: [userId], references: [id])
+  userId         String
+  deleted        Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  articleComment ArticleComment[]
+  articleHeart   ArticleHeart[]
 }
 
-model PComment {
+model ProductComment {
   id        String   @id @default(uuid())
   content   String
   product   Product  @relation(fields: [productId], references: [id])
@@ -68,7 +68,7 @@ model PComment {
   updatedAt DateTime @updatedAt
 }
 
-model AComment {
+model ArticleComment {
   id        String   @id @default(uuid())
   content   String
   article   Article  @relation(fields: [articleId], references: [id])
@@ -87,7 +87,7 @@ model tag {
   content   String
 }
 
-model PHeart {
+model ProductHeart {
   id        String   @id @default(uuid())
   product   Product  @relation(fields: [productId], references: [id])
   productId String
@@ -98,7 +98,7 @@ model PHeart {
   updatedAt DateTime @updatedAt
 }
 
-model AHeart {
+model ArticleHeart {
   id        String   @id @default(uuid())
   article   Article  @relation(fields: [articleId], references: [id])
   articleId String

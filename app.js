@@ -2,36 +2,39 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import productRouter from "./routes/product/product.js";
-import articleRouter from "./routes/article/article.js";
-import pCommentRouter from "./routes/pComment/pComment.js";
-import aCommentRouter from "./routes/aComment/aComment.js";
-import pHeartRouter from "./routes/PHeart/PHeart.js";
-import aHeartRouter from "./routes/AHeart/AHeart.js";
-import userRouter from "./routes/user.js";
+import productController from "./controllers/product.js";
+import articleController from "./controllers/article.js";
+import productCommentController from "./controllers/productComment.js";
+import articleCommentController from "./controllers/articleComment.js";
+import productHeartController from "./controllers/productHeart.js";
+import articleHeartController from "./controllers/articleHeart.js";
+import userController from "./controllers/user.js";
+import passport from "./config/passport.js";
 
 dotenv.config();
 
 const app = express();
+
+app.use(passport.initialize());
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
 // 라우터 등록
-app.use("/product", productRouter);
+app.use("/product", productController);
 
-app.use("/article", articleRouter);
+app.use("/article", articleController);
 
-app.use("/pComment", pCommentRouter);
+app.use("/productComment", productCommentController);
 
-app.use("/aComment", aCommentRouter);
+app.use("/articleComment", articleCommentController);
 
-app.use("/pHeart", pHeartRouter);
+app.use("/productHeart", productHeartController);
 
-app.use("/aHeart", aHeartRouter);
+app.use("/articleHeart", articleHeartController);
 
-app.use("/auth", userRouter);
+app.use("/auth", userController);
 
 // 서버 실행
 const PORT = 5000;

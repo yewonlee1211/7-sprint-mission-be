@@ -1,15 +1,13 @@
-import {
-  fetchAllArticles,
-  fetchArticleById,
-  createArticle,
-  updateArticle,
-  deleteArticleService,
-} from "../../services/article/article.js";
+import { authLoginMiddleware } from "../config/passport.js";
+import articleService from "../services/article.js";
+import express from "express";
 
-export const getAllArticles = async (req, res) => {
+const articleController = express.Router();
+
+articleController.get("/", authLoginMiddleware, async (req, res) => {
   const { query } = req;
   try {
-    const articles = await fetchAllArticles(query);
+    const articles = await articleService.getAll(query);
     if (!articles) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -18,13 +16,13 @@ export const getAllArticles = async (req, res) => {
     console.error("❌ [getAllArticles] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const getArticleById = async (req, res) => {
+articleController.get("/:id", authLoginMiddleware, async (req, res) => {
   const id = req.params.id;
   const userId = req.query.userId;
   try {
-    const articles = await fetchArticleById(id, userId);
+    const articles = await articleService.getById(id, userId);
     if (!articles) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -33,12 +31,12 @@ export const getArticleById = async (req, res) => {
     console.error("❌ [getArticleById] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const postArticle = async (req, res) => {
+articleController.post("/", authLoginMiddleware, async (req, res) => {
   const { data } = req.body;
   try {
-    const articles = await createArticle(data);
+    const articles = await articleService.post(data);
     if (!articles) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -47,13 +45,13 @@ export const postArticle = async (req, res) => {
     console.error("❌ [postArticle] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const patchArticle = async (req, res) => {
+articleController.patch("/:id", authLoginMiddleware, async (req, res) => {
   const { data } = req.body;
   const id = req.params.id;
   try {
-    const articles = await updateArticle(id, data);
+    const articles = await articleService.patch(id, data);
     if (!articles) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -62,18 +60,6 @@ export const patchArticle = async (req, res) => {
     console.error("❌ [patchArticle] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export const deleteArticle = async (req, res) => {
-  const id = req.query.id;
-  try {
-    const articles = await deleteArticleService(id);
-    if (!articles) {
-      return res.status(404).json({ error: "Articles not found" });
-    }
-    res.status(200).json(articles);
-  } catch (error) {
-    console.error("❌ [deleteArticle] error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+export default articleController;

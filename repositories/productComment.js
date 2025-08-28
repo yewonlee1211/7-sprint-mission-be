@@ -4,8 +4,8 @@ const prisma = new PrismaClient();
 
 // 상품 댓글 목록 조회 get
 // 커서 기반 페이지네이션
-export const getAllPComments = async (productId, cursor, limit = 10) => {
-  return await prisma.pComment.findMany({
+const getAll = async (productId, cursor, limit = 10) => {
+  return await prisma.productComment.findMany({
     where: { productId },
     select: {
       id: true,
@@ -19,21 +19,28 @@ export const getAllPComments = async (productId, cursor, limit = 10) => {
 };
 
 // 상품 댓글 등록 post (입력값 data는 객체)
-export const postPComment = async (productId, data) => {
-  return await prisma.pComment.create({
+const post = async (productId, data) => {
+  return await prisma.productComment.create({
     data: { ...data, productId },
   });
 };
 
 // 상품 댓글 수정 patch (입력값 data는 객체, id는 문자열)
-export const patchPComment = async (productId, id, data) => {
-  return await prisma.pComment.update({
+const patch = async (productId, id, data) => {
+  return await prisma.productComment.update({
     where: { id, productId },
     data: data,
   });
 };
 
 // 상품 댓글 삭제 delete (입력값 id)
-export const deletePComment = async (productId, id) => {
-  return await prisma.pComment.delete({ where: { id, productId } });
+const deleteById = async (productId, id) => {
+  return await prisma.productComment.delete({ where: { id, productId } });
+};
+
+export default {
+  getAll,
+  post,
+  patch,
+  deleteById,
 };
