@@ -6,8 +6,9 @@ const productHeartController = express.Router();
 
 productHeartController.post("/", authLoginMiddleware, async (req, res) => {
   const data = req.body;
+  const { id: userId } = req.user;
   try {
-    const hearts = await productHeartService.post(data);
+    const hearts = await productHeartService.post({ ...data, userId });
     if (!hearts) {
       return res.status(404).json({ error: "Articles not found" });
     }
@@ -28,6 +29,22 @@ productHeartController.delete("/:id", authLoginMiddleware, async (req, res) => {
     res.status(200).json(hearts);
   } catch (error) {
     console.error("❌ [patchPHeart] error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+productHeartController.get("/:id", authLoginMiddleware, async (req, res) => {
+  const { id: productId } = req.params;
+  const { id: userId } = req.user;
+  try {
+    console.log("하트 컨트롤러");
+    const hearts = await productHeartService.getByUser(userId, productId);
+    if (!hearts) {
+      return res.status(200).json({ id: "" });
+    }
+    return res.status(200).json(hearts);
+  } catch (error) {
+    console.error("❌ [하트 찾기] error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

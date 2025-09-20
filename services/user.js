@@ -21,20 +21,31 @@ export function createToken(user, type = false) {
   return jwt.sign(payload, process.env.JWT_SECRET, options);
 }
 
-// 리프레쉬 토큰으로 토큰 재발급
-export async function refreshToken(userId, refreshToken) {
-  const user = await findUserById(userId);
-  if (!user || user.refreshToken !== refreshToken) {
-    const error = new Error("Unauthorized");
-    error.code = 401;
-    throw error;
-  }
+// 유저 정보로 토큰 생성 및 업데이트
+export async function refreshUserTokens(user) {
+  const newAccess = createToken(user);
+  const newRefresh = createToken(user, true);
+  await patchUser(user.id, { refreshToken: newRefresh });
 
-  const accessToken = createToken(user);
-  const newRefreshToken = createToken(user, true);
-  return { accessToken, newRefreshToken };
+  return { newAccess, newRefresh };
 }
 
+// 쿠키 세팅 함수
+export async function setTokenCookies(res, tokens) {
+  res.cookie("refreshToken", tokens.newRefresh, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.cookie("accessToken", tokens.newAccess, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 60 * 60 * 1000, // 1시간
+  });
+}
 // 회원가입
 export const createUser = async (user) => {
   const existedUser = await findUserByEmail(user.email);

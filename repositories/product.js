@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { skip } from "@prisma/client/runtime/library";
 const prisma = new PrismaClient();
 
-const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
+const getAll = async ({ userId, keyword, page = 1, limit = 10, order }) => {
   const search = keyword ? `%${keyword}%` : null;
 
   const whereClause = search
@@ -11,7 +11,7 @@ const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
     : Prisma.empty;
 
   const orderClause =
-    orderBy === "hearts"
+    order === "좋아요순"
       ? Prisma.sql`ORDER BY heart_count DESC`
       : Prisma.sql`ORDER BY p."updatedAt" DESC`;
 
@@ -42,7 +42,7 @@ const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
       ${whereClause}
     GROUP BY p.id, u.id
     ${orderClause}
-    LIMIT ${Number(limit)} OFFSET ${Number(offset)};
+    LIMIT ${Number(limit)} OFFSET ${Number(page) - 1};
   `;
 
   const result = rawResult.map((row) => ({
@@ -56,7 +56,7 @@ const getAll = async ({ userId, keyword, offset = 0, limit = 10, orderBy }) => {
 
 // 상품게시글 단일 조회 get
 const getById = async (id, userId) => {
-  return await prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { id, deleted: false },
     select: {
       id: true,
@@ -65,9 +65,10 @@ const getById = async (id, userId) => {
       price: true,
       updatedAt: true,
       user: { select: { id: true, nickname: true, img: true } },
+      tag: { select: { content: true } },
       _count: {
         select: {
-          productHeart,
+          productHeart: true,
           productComment: { where: { deleted: false } },
         },
       },
@@ -77,12 +78,16 @@ const getById = async (id, userId) => {
       },
     },
   });
+  const result = { ...product, isOwn: product.user.id === userId };
+  return result;
 };
 
 // 상품게시글 등록 post (입력값 data는 객체)
 const post = async (data) => {
+  const intData = { ...data, price: parseInt(data.price) };
+
   return await prisma.product.create({
-    data: data,
+    data: intData,
   });
 };
 

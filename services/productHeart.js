@@ -8,7 +8,14 @@ const deleteById = async (id, data) => {
   return await productHeartRepo.deleteById(id, data);
 };
 
+const getByUser = async (userId, productId) => {
+  console.log(`userId: ${userId}`);
+  console.log(`productId: ${productId}`);
+  return await productHeartRepo.getByUser(userId, productId);
+};
+
 export default {
   post,
   deleteById,
+  getByUser,
 };

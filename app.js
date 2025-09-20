@@ -17,9 +17,31 @@ const app = express();
 
 app.use(passport.initialize());
 
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
+app.use(express.json());
+
+// 디버깅 미들웨어 (응답 중복 전송 문제로 인해 주석 처리)
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function (body) {
+    console.log("[DEBUG][json]", req.method, req.url, body);
+    return originalJson.call(this, body);
+  };
+
+  const originalSend = res.send;
+  res.send = function (body) {
+    console.log("[DEBUG][send]", req.method, req.url, body);
+    return originalSend.call(this, body);
+  };
+
+  next();
+});
 
 // 라우터 등록
 app.use("/product", productController);

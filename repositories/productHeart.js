@@ -16,7 +16,14 @@ const deleteById = async (id) => {
   });
 };
 
+const getByUser = async (userId, productId) => {
+  return await prisma.productHeart.findFirst({
+    where: { userId: userId, productId: productId },
+  });
+};
+
 export default {
   post,
   deleteById,
+  getByUser,
 };

@@ -6,8 +6,9 @@ const articleHeartController = express.Router();
 
 articleHeartController.post("/", authLoginMiddleware, async (req, res) => {
   const data = req.body;
+  const { id: userId } = req.user;
   try {
-    const hearts = await articleHeartService.post(data);
+    const hearts = await articleHeartService.post({ ...data, userId });
     if (!hearts) {
       return res.status(404).json({ error: "Articles not found" });
     }

@@ -96,6 +96,8 @@ model ProductHeart {
   canceled  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
 }
 
 model ArticleHeart {
@@ -107,6 +109,8 @@ model ArticleHeart {
   canceled  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([articleId, userId])
 }
 
 // CREATE TABLE 상품게시물이미지 (
