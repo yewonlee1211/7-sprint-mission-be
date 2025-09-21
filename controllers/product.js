@@ -8,12 +8,13 @@ const productController = express.Router();
 productController.get("/", authLoginMiddleware, async (req, res) => {
   const { query } = req;
   console.log(query);
+  console.log("목록 조회");
   try {
     const products = await productService.getAll(query);
     if (!products) {
       return res.status(404).json({ error: "Products not found" });
     }
-    return res.status(200).json(products);
+    res.status(200).json(products);
   } catch (error) {
     console.error("❌ [getAllProducts] error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -23,6 +24,7 @@ productController.get("/", authLoginMiddleware, async (req, res) => {
 productController.get("/:id", authLoginMiddleware, async (req, res) => {
   const id = req.params.id;
   const userId = req.user.id;
+  console.log("개별 조회");
   try {
     const products = await productService.getById(id, userId);
     if (!products) {
