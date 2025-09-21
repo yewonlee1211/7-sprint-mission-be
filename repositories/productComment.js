@@ -19,9 +19,10 @@ const getAll = async (productId, cursor, limit = 10) => {
 };
 
 // 상품 댓글 등록 post (입력값 data는 객체)
-const post = async (productId, data) => {
+const post = async (data) => {
+  console.log(data);
   return await prisma.productComment.create({
-    data: { ...data, productId },
+    data: data,
   });
 };
 

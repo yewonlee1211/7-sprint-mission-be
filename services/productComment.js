@@ -4,8 +4,8 @@ const getAll = async (productId, cursor) => {
   return await productCommentRepo.getAll(productId, cursor);
 };
 
-const post = async (productId, data) => {
-  return await productCommentRepo.post(productId, data);
+const post = async (data) => {
+  return await productCommentRepo.post(data);
 };
 
 const patch = async (productId, id, data) => {

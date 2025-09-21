@@ -28,9 +28,14 @@ productCommentController.post(
   authLoginMiddleware,
   async (req, res) => {
     const productId = req.params.productId;
-    const data = req.body;
+    const { data } = req.body;
+    const { id: userId } = req.user;
     try {
-      const pComments = await productCommentService.post(productId, data);
+      const pComments = await productCommentService.post({
+        ...data,
+        userId,
+        productId,
+      });
       if (!pComments) {
         return res.status(404).json({ error: "PComments not found" });
       }
