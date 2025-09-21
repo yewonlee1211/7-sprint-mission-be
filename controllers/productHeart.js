@@ -37,11 +37,7 @@ productHeartController.get("/:id", authLoginMiddleware, async (req, res) => {
   const { id: productId } = req.params;
   const { id: userId } = req.user;
   try {
-    console.log("하트 컨트롤러");
     const hearts = await productHeartService.getByUser(userId, productId);
-    if (!hearts) {
-      return res.status(200).json({ id: "" });
-    }
     return res.status(200).json(hearts);
   } catch (error) {
     console.error("❌ [하트 찾기] error:", error);

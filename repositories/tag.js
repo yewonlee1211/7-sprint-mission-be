@@ -9,6 +9,13 @@ const post = async (tag, id) => {
   });
 };
 
+const deleteAll = async (productId) => {
+  return await prisma.tag.deleteMany({
+    where: { productId },
+  });
+};
+
 export default {
   post,
+  deleteAll,
 };

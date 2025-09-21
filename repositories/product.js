@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 
 const getAll = async ({ userId, keyword, page = 1, limit = 10, order }) => {
   const search = keyword ? `%${keyword}%` : null;
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
 
   const whereClause = search
     ? Prisma.sql`AND (p.name ILIKE ${search} OR p.description ILIKE ${search})`
@@ -15,11 +17,13 @@ const getAll = async ({ userId, keyword, page = 1, limit = 10, order }) => {
       ? Prisma.sql`ORDER BY heart_count DESC`
       : Prisma.sql`ORDER BY p."updatedAt" DESC`;
 
+  // 한 번의 쿼리로 데이터와 총 개수를 모두 가져오기
   const rawResult = await prisma.$queryRaw`
     SELECT 
       p.id, 
       p.name, 
       p."updatedAt",
+      p.price,
       u.id AS "userId", 
       u.nickname, 
       u.img,
@@ -34,7 +38,8 @@ const getAll = async ({ userId, keyword, page = 1, limit = 10, order }) => {
         WHERE h3."productId" = p.id
           AND h3."userId" = ${userId}
         LIMIT 1
-      ) AS "heartId"
+      ) AS "heartId",
+      COUNT(*) OVER() as total_count
     FROM "Product" p
     JOIN "User" u ON p."userId" = u.id
     LEFT JOIN "ProductHeart" h ON h."productId" = p.id
@@ -42,16 +47,31 @@ const getAll = async ({ userId, keyword, page = 1, limit = 10, order }) => {
       ${whereClause}
     GROUP BY p.id, u.id
     ${orderClause}
-    LIMIT ${Number(limit)} OFFSET ${Number(page) - 1};
+    LIMIT ${limitNum} OFFSET ${(pageNum - 1) * limitNum};
   `;
 
-  const result = rawResult.map((row) => ({
+  const products = rawResult.map(({ total_count, ...row }) => ({
     ...row,
-    heart_count: Number(row.heart_count),
-    comment_count: Number(row.comment_count),
+    heart_count: parseInt(row.heart_count),
+    comment_count: parseInt(row.comment_count),
   }));
 
-  return result;
+  // 첫 번째 행에서 total_count 가져오기 (모든 행이 동일한 값)
+  const totalCount =
+    rawResult.length > 0 ? parseInt(rawResult[0].total_count) : 0;
+  const totalPages = Math.ceil(totalCount / limitNum);
+  const hasNextPage = pageNum < totalPages;
+  const hasPrevPage = pageNum > 1;
+
+  return {
+    products,
+    pagination: {
+      currentPage: pageNum,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    },
+  };
 };
 
 // 상품게시글 단일 조회 get
@@ -88,20 +108,26 @@ const post = async (data) => {
 
   return await prisma.product.create({
     data: intData,
+    include: { tag: true },
   });
 };
 
 // 상품게시글 수정 patch (입력값 data는 객체, id는 문자열)
 const patch = async (id, data) => {
+  const intData = { ...data, price: parseInt(data.price) };
+
   return await prisma.product.update({
     where: { id: id },
-    data: data,
+    data: intData,
   });
 };
 
 // 상품게시글 삭제 delete (입력값 id)
 const deleteById = async (id) => {
-  return await prisma.product.delete({ where: { id: id } });
+  return await prisma.product.update({
+    where: { id: id },
+    data: { deleted: true },
+  });
 };
 
 export default {

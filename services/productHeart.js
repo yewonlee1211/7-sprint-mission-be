@@ -9,8 +9,6 @@ const deleteById = async (id, data) => {
 };
 
 const getByUser = async (userId, productId) => {
-  console.log(`userId: ${userId}`);
-  console.log(`productId: ${productId}`);
   return await productHeartRepo.getByUser(userId, productId);
 };
 

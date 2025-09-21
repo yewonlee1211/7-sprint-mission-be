@@ -23,8 +23,9 @@ userController.get("/", authLoginMiddleware, async (req, res) => {
     }
     return res.status(200).json({ user });
   } catch (e) {
-    console.error("❌ [getUser] err:", e);
-    return res.status(500).json({ error: `${e}` });
+    if (!res.headersSent) {
+      return res.status(500).json({ error: "getuser Internal Server Error" });
+    }
   }
 });
 

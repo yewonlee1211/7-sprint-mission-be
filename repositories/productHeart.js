@@ -17,9 +17,13 @@ const deleteById = async (id) => {
 };
 
 const getByUser = async (userId, productId) => {
-  return await prisma.productHeart.findFirst({
-    where: { userId: userId, productId: productId },
+  const heartsList = await prisma.productHeart.findMany({
+    where: { productId },
   });
+  console.log(heartsList);
+  const isHearted = heartsList.find((heart) => heart.userId === userId);
+  const result = { count: heartsList.length, id: isHearted?.id };
+  return result;
 };
 
 export default {
